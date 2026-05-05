@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import confetti from "canvas-confetti";
-import { useInjectorStore } from "../store/useInjectorStore";
+import { useInjectorStore } from "@/store/useInjectorStore";
 import { Play, Square, Settings, RefreshCcw, Activity, Search, ChevronLeft, ChevronRight, Dices, TriangleAlert } from "lucide-react";
 
 export default function FormWeaver() {
