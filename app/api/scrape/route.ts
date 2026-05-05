@@ -1,3 +1,4 @@
+// app/api/scrape/route.ts
 export const runtime = 'nodejs';
 
 import { NextResponse } from 'next/server';
@@ -6,7 +7,7 @@ import * as cheerio from 'cheerio';
 export async function POST(req: Request) {
   try {
     const { url } = await req.json();
-    
+
     if (!url || !url.includes('docs.google.com/forms')) {
       return NextResponse.json({ error: 'URL do Google Forms inválida' }, { status: 400 });
     }
@@ -16,10 +17,10 @@ export async function POST(req: Request) {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
       }
     });
-    
+
     const html = await res.text();
     const $ = cheerio.load(html);
-    
+
     let scriptContent = '';
     $('script').each((_, el) => {
       const text = $(el).html();
@@ -32,9 +33,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Não foi possível encontrar a estrutura do formulário' }, { status: 400 });
     }
 
-    const match = scriptContent.match(/var FB_PUBLIC_LOAD_DATA_ = (\[.*?\]);\s*<\/script>/s) || 
-                  scriptContent.match(/var FB_PUBLIC_LOAD_DATA_ = (\[.*\]);/);
-                  
+    const match = scriptContent.match(/var\s+FB_PUBLIC_LOAD_DATA_\s*=\s*(\[[\s\S]*?\]);/);
+
     if (!match) {
       return NextResponse.json({ error: 'Falha no parsing dos dados internos' }, { status: 400 });
     }
@@ -47,18 +47,18 @@ export async function POST(req: Request) {
 
     fields.forEach((f: any) => {
       const questionTitle = f[1];
-      const questionType = f[3]; // 2: Múltipla Escolha, 3: Dropdown, 4: Checkboxes
-      
+      const questionType = f[3];
+
       if ([2, 3, 4].includes(questionType) && f[4] && f[4][0]) {
         const entryId = f[4][0][0];
         const optionsData = f[4][0][1];
-        
+
         if (optionsData) {
           const options = optionsData.map((opt: any) => ({
             value: String(opt[0]),
             weight: Math.floor(100 / optionsData.length)
           }));
-          
+
           questions.push({
             id: `entry.${entryId}`,
             title: questionTitle,

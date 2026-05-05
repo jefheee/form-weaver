@@ -1,3 +1,4 @@
+// store/useInjectorStore.ts
 import { create } from 'zustand';
 
 export interface Option {
@@ -17,22 +18,24 @@ interface InjectorState {
   targetCount: number;
   formTitle: string | null;
   questions: Question[];
+  currentQuestionIndex: number;
   currentCount: number;
   isInjecting: boolean;
   isScraping: boolean;
   logs: string[];
   abortController: AbortController | null;
-  
+
   setFormUrl: (url: string) => void;
   setTargetCount: (count: number) => void;
-  updateOptionWeight: (questionId: string, value: string, weight: number) => void;
+  updateOptionWeight: (questionId: string, optionValue: string, newWeight: number) => void;
+  randomizeWeights: (questionId: string) => void;
+  nextQuestion: () => void;
+  prevQuestion: () => void;
   scrapeForm: () => Promise<void>;
   startInjection: () => void;
   stopInjection: () => void;
   addLog: (msg: string) => void;
 }
-
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const getWeightedRandom = (options: Option[]) => {
   const totalWeight = options.reduce((sum, opt) => sum + opt.weight, 0);
@@ -49,6 +52,7 @@ export const useInjectorStore = create<InjectorState>((set, get) => ({
   targetCount: 50,
   formTitle: null,
   questions: [],
+  currentQuestionIndex: 0,
   currentCount: 0,
   isInjecting: false,
   isScraping: false,
@@ -57,37 +61,127 @@ export const useInjectorStore = create<InjectorState>((set, get) => ({
 
   setFormUrl: (url) => set({ formUrl: url }),
   setTargetCount: (count) => set({ targetCount: count }),
-  
-  updateOptionWeight: (questionId, value, weight) => set((state) => ({
-    questions: state.questions.map(q => 
-      q.id === questionId 
-        ? { ...q, options: q.options.map(o => o.value === value ? { ...o, weight } : o) }
-        : q
-    )
+
+  nextQuestion: () => set((state) => ({
+    currentQuestionIndex: Math.min(state.questions.length - 1, state.currentQuestionIndex + 1)
   })),
 
-  addLog: (msg) => set((state) => ({ 
-    logs: [`[${new Date().toLocaleTimeString()}] ${msg}`, ...state.logs].slice(0, 50) 
+  prevQuestion: () => set((state) => ({
+    currentQuestionIndex: Math.max(0, state.currentQuestionIndex - 1)
+  })),
+
+  randomizeWeights: (questionId) => set((state) => {
+    const qIndex = state.questions.findIndex(q => q.id === questionId);
+    if (qIndex === -1) return state;
+
+    const question = state.questions[qIndex];
+    const newOptions = [...question.options];
+
+    let remaining = 100;
+    for (let i = 0; i < newOptions.length - 1; i++) {
+      const randomWeight = Math.floor(Math.random() * (remaining + 1));
+      newOptions[i] = { ...newOptions[i], weight: randomWeight };
+      remaining -= randomWeight;
+    }
+    newOptions[newOptions.length - 1] = { ...newOptions[newOptions.length - 1], weight: remaining };
+
+    // Shuffle
+    for (let i = newOptions.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const temp = newOptions[i].weight;
+      newOptions[i].weight = newOptions[j].weight;
+      newOptions[j].weight = temp;
+    }
+
+    const updatedQuestions = [...state.questions];
+    updatedQuestions[qIndex] = { ...question, options: newOptions };
+
+    return { questions: updatedQuestions };
+  }),
+
+  updateOptionWeight: (questionId, optionValue, newWeight) => set((state) => {
+    const qIndex = state.questions.findIndex(q => q.id === questionId);
+    if (qIndex === -1) return state;
+
+    const question = state.questions[qIndex];
+    const newOptions = [...question.options];
+    const optionIndex = newOptions.findIndex(o => o.value === optionValue);
+
+    if (optionIndex === -1) return state;
+
+    const clampedWeight = Math.min(100, Math.max(0, newWeight));
+    const oldWeight = newOptions[optionIndex].weight;
+    const delta = clampedWeight - oldWeight;
+
+    if (delta === 0) return state;
+
+    newOptions[optionIndex] = { ...newOptions[optionIndex], weight: clampedWeight };
+
+    const otherOptionsIndices = newOptions.map((_, i) => i).filter(i => i !== optionIndex);
+
+    if (otherOptionsIndices.length > 0) {
+      const totalOtherWeight = otherOptionsIndices.reduce((sum, idx) => sum + newOptions[idx].weight, 0);
+
+      otherOptionsIndices.forEach(idx => {
+        let adjustment = 0;
+        if (totalOtherWeight === 0) {
+          adjustment = delta / otherOptionsIndices.length;
+        } else {
+          adjustment = delta * (newOptions[idx].weight / totalOtherWeight);
+        }
+        newOptions[idx] = { ...newOptions[idx], weight: newOptions[idx].weight - adjustment };
+      });
+
+      newOptions.forEach((opt, idx) => {
+        newOptions[idx].weight = Math.floor(opt.weight);
+      });
+
+      let diff = 100 - newOptions.reduce((sum, opt) => sum + opt.weight, 0);
+
+      for (let i = 0; i < otherOptionsIndices.length && diff !== 0; i++) {
+        const idx = otherOptionsIndices[i];
+        if (diff > 0) {
+          newOptions[idx].weight += 1;
+          diff -= 1;
+        } else if (diff < 0 && newOptions[idx].weight > 0) {
+          newOptions[idx].weight -= 1;
+          diff += 1;
+        }
+      }
+
+      if (diff !== 0) {
+        newOptions[optionIndex].weight += diff;
+      }
+    }
+
+    const updatedQuestions = [...state.questions];
+    updatedQuestions[qIndex] = { ...question, options: newOptions };
+
+    return { questions: updatedQuestions };
+  }),
+
+  addLog: (msg) => set((state) => ({
+    logs: [`[${new Date().toLocaleTimeString()}] ${msg}`, ...state.logs].slice(0, 50)
   })),
 
   scrapeForm: async () => {
     const { formUrl, addLog } = get();
     if (!formUrl) return;
-    
-    set({ isScraping: true, formTitle: null, questions: [], logs: [] });
+
+    set({ isScraping: true, formTitle: null, questions: [], logs: [], currentQuestionIndex: 0 });
     addLog(`Iniciando scrape: ${formUrl}`);
-    
+
     try {
       const res = await fetch('/api/scrape', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: formUrl })
       });
-      
+
       const data = await res.json();
-      
+
       if (!res.ok) throw new Error(data.error || 'Erro no scrape');
-      
+
       set({ formTitle: data.title, questions: data.questions, isScraping: false });
       addLog(`Formulário carregado: ${data.title} (${data.questions.length} perguntas suportadas)`);
     } catch (err: any) {
@@ -99,15 +193,14 @@ export const useInjectorStore = create<InjectorState>((set, get) => ({
   startInjection: async () => {
     const state = get();
     if (state.isInjecting || state.currentCount >= state.targetCount || state.questions.length === 0) return;
-    
+
     const controller = new AbortController();
     set({ isInjecting: true, abortController: controller });
     get().addLog('Iniciando injeção gradual...');
 
     while (get().isInjecting && get().currentCount < get().targetCount) {
       const current = get();
-      
-      // Sorteia as respostas baseadas nos pesos
+
       const answers: Record<string, string | string[]> = {};
       current.questions.forEach(q => {
         answers[q.id] = getWeightedRandom(q.options);
@@ -137,10 +230,9 @@ export const useInjectorStore = create<InjectorState>((set, get) => ({
       }
 
       if (get().currentCount < get().targetCount && get().isInjecting) {
-        // Delay randômico entre 2500ms e 6000ms para evasão
         const delay = Math.floor(Math.random() * (6000 - 2500 + 1) + 2500);
         get().addLog(`Aguardando ${(delay / 1000).toFixed(1)}s para evasão de rate limit...`);
-        
+
         try {
           await new Promise((resolve, reject) => {
             const timeoutId = setTimeout(resolve, delay);
@@ -148,19 +240,19 @@ export const useInjectorStore = create<InjectorState>((set, get) => ({
               clearTimeout(timeoutId);
               reject(new Error('AbortError'));
             };
-            
+
             if (current.abortController?.signal.aborted) {
-               onAbort();
+              onAbort();
             } else {
-               current.abortController?.signal.addEventListener('abort', onAbort);
+              current.abortController?.signal.addEventListener('abort', onAbort);
             }
           });
         } catch (e: any) {
-           if (e.message === 'AbortError') break;
+          if (e.message === 'AbortError') break;
         }
       }
     }
-    
+
     if (get().currentCount >= get().targetCount) {
       get().addLog('Injeção concluída com sucesso.');
     }
