@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import confetti from "canvas-confetti";
 import { useInjectorStore } from "../store/useInjectorStore";
-import { Play, Square, Settings, RefreshCcw, Activity, Search, ChevronLeft, ChevronRight, Dices } from "lucide-react";
+import { Play, Square, Settings, RefreshCcw, Activity, Search, ChevronLeft, ChevronRight, Dices, TriangleAlert } from "lucide-react";
 
 export default function FormWeaver() {
   const {
@@ -23,7 +23,8 @@ export default function FormWeaver() {
 
   // Auto-Scrape
   useEffect(() => {
-    if (formUrl.includes('docs.google.com/forms') && formUrl !== scrapedUrlRef.current && !isScraping) {
+    const isValidUrl = (formUrl.includes('docs.google.com/forms/d/e/') && formUrl.includes('/viewform')) || formUrl.includes('forms.gle/');
+    if (isValidUrl && !formUrl.includes('/edit') && formUrl !== scrapedUrlRef.current && !isScraping) {
       scrapedUrlRef.current = formUrl;
       scrapeForm();
     }
@@ -132,6 +133,12 @@ export default function FormWeaver() {
                     disabled={isInjecting || isFinished}
                   />
                 </div>
+                {targetCount > 50 && (
+                  <div className="flex items-start gap-2 mt-3 p-2 bg-yellow-500/10 border border-yellow-500/20 rounded-md text-yellow-500/80">
+                    <TriangleAlert className="w-4 h-4 shrink-0 mt-0.5" />
+                    <p className="text-[10px] leading-tight">Aviso: Quantidades acima de 50 envios sem proxy podem sofrer shadowban do Google (parece enviado, mas não é computado).</p>
+                  </div>
+                )}
               </div>
             </div>
           </section>

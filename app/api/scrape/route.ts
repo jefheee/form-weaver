@@ -8,17 +8,28 @@ export async function POST(req: Request) {
   try {
     const { url } = await req.json();
 
-    if (!url || !url.includes('docs.google.com/forms')) {
-      return NextResponse.json({ error: 'URL do Google Forms inválida' }, { status: 400 });
+    if (!url || (!url.includes('docs.google.com/forms') && !url.includes('forms.gle'))) {
+      return NextResponse.json({ error: 'URL do Google Forms inválida. Use links do tipo docs.google.com/forms ou forms.gle' }, { status: 400 });
+    }
+
+    if (url.includes('/edit')) {
+      return NextResponse.json({ error: 'URLs de edição não são suportadas. Use o link público (viewform).' }, { status: 400 });
     }
 
     const res = await fetch(url, {
+      redirect: 'follow',
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
       }
     });
 
+    const finalUrl = res.url;
     const html = await res.text();
+
+    if (finalUrl.includes('accounts.google.com') || html.includes('accounts.google.com/ServiceLogin')) {
+      return NextResponse.json({ error: 'Este formulário é privado ou exige login do Google. A injeção anônima foi bloqueada.' }, { status: 403 });
+    }
+    
     const $ = cheerio.load(html);
 
     let scriptContent = '';

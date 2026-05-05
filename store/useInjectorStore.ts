@@ -195,6 +195,7 @@ export const useInjectorStore = create<InjectorState>((set, get) => ({
     
     if (otherOptionsIndices.length > 0) {
       const totalOtherWeight = otherOptionsIndices.reduce((sum, idx) => sum + newOptions[idx].weight, 0);
+      const exactWeights: Record<number, number> = {};
       
       otherOptionsIndices.forEach(idx => {
         let adjustment = 0;
@@ -203,28 +204,22 @@ export const useInjectorStore = create<InjectorState>((set, get) => ({
         } else {
           adjustment = delta * (newOptions[idx].weight / totalOtherWeight);
         }
-        newOptions[idx] = { ...newOptions[idx], weight: newOptions[idx].weight - adjustment };
-      });
-
-      newOptions.forEach((opt, idx) => {
-        newOptions[idx].weight = Math.floor(opt.weight);
+        exactWeights[idx] = newOptions[idx].weight - adjustment;
+        newOptions[idx] = { ...newOptions[idx], weight: Math.floor(exactWeights[idx]) };
       });
 
       let diff = 100 - newOptions.reduce((sum, opt) => sum + opt.weight, 0);
 
-      for (let i = 0; i < otherOptionsIndices.length && diff !== 0; i++) {
-        const idx = otherOptionsIndices[i];
-        if (diff > 0) {
-          newOptions[idx].weight += 1;
-          diff -= 1;
-        } else if (diff < 0 && newOptions[idx].weight > 0) {
-          newOptions[idx].weight -= 1;
-          diff += 1;
-        }
-      }
-      
-      if (diff !== 0) {
-         newOptions[optionIndex].weight += diff;
+      const remainders = otherOptionsIndices.map(idx => ({
+        idx,
+        remainder: exactWeights[idx] - newOptions[idx].weight
+      })).sort((a, b) => b.remainder - a.remainder);
+
+      let i = 0;
+      while (diff > 0 && i < remainders.length) {
+        newOptions[remainders[i].idx].weight += 1;
+        diff -= 1;
+        i++;
       }
     }
 
@@ -240,7 +235,12 @@ export const useInjectorStore = create<InjectorState>((set, get) => ({
 
   scrapeForm: async () => {
     const { formUrl, addLog } = get();
-    if (!formUrl || !formUrl.includes('docs.google.com/forms')) return;
+    
+    const isValidUrl = (formUrl.includes('docs.google.com/forms/d/e/') && formUrl.includes('/viewform')) || formUrl.includes('forms.gle/');
+    if (!formUrl || !isValidUrl || formUrl.includes('/edit')) {
+      addLog('[ERRO] URL inválida. Use links públicos (viewform ou forms.gle). Links de edição (/edit) são bloqueados.');
+      return;
+    }
     
     set({ isScraping: true, formTitle: null, questions: [], logs: [], currentQuestionIndex: 0 });
     addLog(`Iniciando scrape: ${formUrl}`);
@@ -259,7 +259,7 @@ export const useInjectorStore = create<InjectorState>((set, get) => ({
       set({ formTitle: data.title, questions: data.questions, isScraping: false });
       addLog(`Formulário carregado: ${data.title} (${data.questions.length} perguntas suportadas)`);
     } catch (err: any) {
-      addLog(`Erro: ${err.message}`);
+      addLog(`[ERRO] ${err.message}`);
       set({ isScraping: false });
     }
   },
