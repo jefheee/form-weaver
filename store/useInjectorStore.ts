@@ -236,9 +236,9 @@ export const useInjectorStore = create<InjectorState>((set, get) => ({
   scrapeForm: async () => {
     const { formUrl, addLog } = get();
     
-    const isValidUrl = (formUrl.includes('docs.google.com/forms/d/e/') && formUrl.includes('/viewform')) || formUrl.includes('forms.gle/');
+    const isValidUrl = /^https:\/\/(forms\.gle\/[a-zA-Z0-9_-]+|docs\.google\.com\/forms\/d\/e\/[a-zA-Z0-9_-]+\/viewform)(\?.*)?$/.test(formUrl);
     if (!formUrl || !isValidUrl || formUrl.includes('/edit')) {
-      addLog('[ERRO] URL inválida. Use links públicos (viewform ou forms.gle). Links de edição (/edit) são bloqueados.');
+      addLog('[ERRO] Forneça um link público válido de resposta (/viewform ou forms.gle). Links de edição não são suportados.');
       return;
     }
     

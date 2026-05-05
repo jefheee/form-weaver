@@ -8,12 +8,14 @@ export async function POST(req: Request) {
   try {
     const { url } = await req.json();
 
-    if (!url || (!url.includes('docs.google.com/forms') && !url.includes('forms.gle'))) {
-      return NextResponse.json({ error: 'URL do Google Forms inválida. Use links do tipo docs.google.com/forms ou forms.gle' }, { status: 400 });
+    const isValidUrl = /^https:\/\/(forms\.gle\/[a-zA-Z0-9_-]+|docs\.google\.com\/forms\/d\/e\/[a-zA-Z0-9_-]+\/viewform)(\?.*)?$/.test(url);
+
+    if (!url || !isValidUrl) {
+      return NextResponse.json({ error: 'Erro: Forneça um link público válido de resposta (/viewform ou forms.gle). Links de edição não são suportados.' }, { status: 400 });
     }
 
     if (url.includes('/edit')) {
-      return NextResponse.json({ error: 'URLs de edição não são suportadas. Use o link público (viewform).' }, { status: 400 });
+      return NextResponse.json({ error: 'Erro: Forneça um link público válido de resposta (/viewform ou forms.gle). Links de edição não são suportados.' }, { status: 400 });
     }
 
     const res = await fetch(url, {
