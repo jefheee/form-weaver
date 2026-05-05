@@ -3,10 +3,11 @@ import { ShieldCheck, PieChart, Rocket, ChevronRight } from 'lucide-react';
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen w-full bg-[#050505] text-neutral-200 font-sans selection:bg-emerald-500/30 flex flex-col relative overflow-hidden">
+    <main className="relative min-h-screen w-screen overflow-x-hidden flex flex-col justify-center items-center bg-[#050505] text-neutral-200 font-sans selection:bg-emerald-500/30">
       
-      {/* Background Decorator */}
-      <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-[60%] h-[50%] bg-emerald-500/15 blur-[120px] rounded-full pointer-events-none" />
+      {/* Background Animado Dinâmico */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full mix-blend-screen filter blur-[100px] opacity-30 animate-pulse bg-emerald-600 pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full mix-blend-screen filter blur-[100px] opacity-30 animate-pulse delay-1000 bg-teal-800 pointer-events-none" />
 
       <main className="max-w-6xl w-full px-6 py-24 flex flex-col items-center mx-auto z-10 flex-1">
         
@@ -37,7 +38,7 @@ export default function LandingPage() {
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link 
-              href="#" 
+              href="/docs" 
               className="group flex items-center justify-center gap-2 px-8 py-3.5 font-medium text-white bg-white/5 border border-white/10 hover:bg-white/10 rounded-lg transition-all duration-300"
             >
               Ver Documentação
@@ -90,6 +91,6 @@ export default function LandingPage() {
           Form Weaver &copy; 2026. Desenvolvido para fins de validação estrutural.
         </p>
       </footer>
-    </div>
+    </main>
   );
 }

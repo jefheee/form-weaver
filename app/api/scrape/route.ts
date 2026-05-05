@@ -28,8 +28,8 @@ export async function POST(req: Request) {
     const finalUrl = res.url;
     const html = await res.text();
 
-    if (finalUrl.includes('accounts.google.com') || html.includes('accounts.google.com/ServiceLogin')) {
-      return NextResponse.json({ error: 'Este formulário é privado ou exige login do Google. A injeção anônima foi bloqueada.' }, { status: 403 });
+    if (finalUrl.includes('ServiceLogin') || finalUrl.includes('accounts.google.com') || html.includes('<title>Google Accounts</title>') || html.includes('accounts.google.com/ServiceLogin')) {
+      return NextResponse.json({ error: "Formulário protegido: O criador ativou 'Limitar a 1 resposta' ou 'Coletar e-mails'. O Google exige login, bloqueando injeções anônimas." }, { status: 403 });
     }
     
     const $ = cheerio.load(html);

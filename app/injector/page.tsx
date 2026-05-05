@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import confetti from "canvas-confetti";
+import Link from "next/link";
 import { useInjectorStore } from "@/store/useInjectorStore";
 import { Play, Square, Settings, RefreshCcw, Activity, Search, ChevronLeft, ChevronRight, Dices, TriangleAlert } from "lucide-react";
 
@@ -58,43 +59,43 @@ export default function FormWeaver() {
   }, [isFinished]);
 
   return (
-    <main className="h-screen w-screen overflow-hidden bg-[#0a0a0a] bg-gradient-to-br from-emerald-900/10 to-black text-neutral-200 p-6 flex flex-col gap-6 font-sans selection:bg-neutral-800">
+    <main className="h-screen w-screen overflow-hidden bg-[#0a0a0a] bg-gradient-to-br from-emerald-900/10 to-black text-neutral-200 p-2 md:p-4 lg:p-6 flex flex-col gap-3 md:gap-4 lg:gap-6 font-sans selection:bg-neutral-800">
       
       {/* Header */}
-      <header className="flex items-center justify-between border-b border-white/10 pb-4 shrink-0 transition-all duration-300">
-        <div className="flex items-center gap-3">
-          <Activity className="text-neutral-400 w-6 h-6" />
-          <h1 className="text-xl font-medium tracking-tight text-white">Form Weaver</h1>
-        </div>
-        <div className="text-xs text-neutral-500 flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-500/50 animate-pulse"></span>
+      <header className="flex items-center justify-between border-b border-white/10 pb-2 lg:pb-4 shrink-0 transition-all duration-300">
+        <Link href="/" className="flex items-center gap-2 lg:gap-3 hover:text-emerald-400 transition-colors cursor-pointer group">
+          <Activity className="text-neutral-400 group-hover:text-emerald-400 transition-colors w-5 h-5 lg:w-6 lg:h-6" />
+          <h1 className="text-lg lg:text-xl font-medium tracking-tight text-white group-hover:text-emerald-400 transition-colors">Form Weaver</h1>
+        </Link>
+        <div className="text-[10px] lg:text-xs text-neutral-500 flex items-center gap-1 lg:gap-2">
+          <span className="w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full bg-emerald-500/50 animate-pulse"></span>
           System Online
         </div>
       </header>
 
       {/* Grid Principal */}
-      <div className="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-0">
+      <div className="flex-1 overflow-hidden flex flex-col lg:grid lg:grid-cols-2 gap-4 lg:gap-6 min-h-0">
         
         {/* Coluna Esquerda: Config & Execução */}
-        <div className="flex flex-col gap-6 min-h-0 h-full">
+        <div className="flex flex-col gap-3 lg:gap-6 min-h-0 h-[45%] lg:h-full shrink-0 lg:shrink">
           
           {/* Configuração */}
-          <section className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-5 shadow-2xl shrink-0 transition-all duration-300">
-            <div className="flex items-center gap-2 mb-4 text-neutral-100">
-              <Settings className="w-4 h-4 text-neutral-400" />
-              <h2 className="text-sm font-medium">Configuração Alvo</h2>
+          <section className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-3 lg:p-5 shadow-2xl shrink-0 transition-all duration-300">
+            <div className="flex items-center gap-2 mb-2 lg:mb-4 text-neutral-100">
+              <Settings className="w-3 h-3 lg:w-4 lg:h-4 text-neutral-400" />
+              <h2 className="text-xs lg:text-sm font-medium">Configuração Alvo</h2>
             </div>
             
-            <div className="space-y-5">
+            <div className="space-y-3 lg:space-y-5">
               <div>
-                <label className="text-xs text-neutral-500 mb-1.5 block">Google Forms View URL</label>
+                <label className="text-[10px] lg:text-xs text-neutral-500 mb-1 lg:mb-1.5 block">Google Forms View URL</label>
                 <div className="relative">
                   <input 
                     type="url"
                     value={formUrl}
                     onChange={(e) => setFormUrl(e.target.value)}
                     placeholder="https://docs.google.com/forms/d/e/.../viewform"
-                    className="w-full bg-black/40 border border-white/10 rounded-lg pl-3 pr-10 py-2 text-sm focus:outline-none focus:border-emerald-500/50 transition-all duration-300 ease-in-out placeholder:text-neutral-700"
+                    className="w-full bg-black/40 border border-white/10 rounded-lg pl-2 lg:pl-3 pr-8 lg:pr-10 py-1.5 lg:py-2 text-[10px] lg:text-sm focus:outline-none focus:border-emerald-500/50 transition-all duration-300 ease-in-out placeholder:text-neutral-700"
                     disabled={isInjecting || isFinished}
                   />
                   {isScraping && (
@@ -105,16 +106,16 @@ export default function FormWeaver() {
                 </div>
               </div>
               
-              <div className="pt-4 border-t border-[#262626]">
-                <label className="text-xs text-neutral-500 mb-2 block">Quantidade de Submissões</label>
-                <div className="flex gap-4">
-                  <div className="flex flex-wrap gap-2 shrink-0">
+              <div className="pt-2 lg:pt-4 border-t border-white/10">
+                <label className="text-[10px] lg:text-xs text-neutral-500 mb-1 lg:mb-2 block">Quantidade de Submissões</label>
+                <div className="flex gap-2 lg:gap-4 items-center">
+                  <div className="flex flex-wrap gap-1 lg:gap-2 shrink-0">
                     {[10, 25, 50, 100].map(val => (
                       <button
                         key={val}
                         onClick={() => setTargetCount(val)}
                         disabled={isInjecting || isFinished}
-                        className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-300 ease-in-out ${
+                        className={`px-2 lg:px-3 py-1 lg:py-1.5 text-[10px] lg:text-xs font-medium rounded-md transition-all duration-300 ease-in-out ${
                           targetCount === val 
                             ? 'bg-neutral-200 text-black' 
                             : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700 hover:text-white'
@@ -129,14 +130,14 @@ export default function FormWeaver() {
                     value={targetCount}
                     onChange={(e) => setTargetCount(Number(e.target.value))}
                     min={1}
-                    className="w-full flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500/50 transition-all duration-300 ease-in-out"
+                    className="w-full flex-1 bg-black/40 border border-white/10 rounded-lg px-2 lg:px-3 py-1 lg:py-2 text-[10px] lg:text-sm focus:outline-none focus:border-emerald-500/50 transition-all duration-300 ease-in-out"
                     disabled={isInjecting || isFinished}
                   />
                 </div>
                 {targetCount > 50 && (
-                  <div className="flex items-start gap-2 mt-3 p-2 bg-yellow-500/10 border border-yellow-500/20 rounded-md text-yellow-500/80">
-                    <TriangleAlert className="w-4 h-4 shrink-0 mt-0.5" />
-                    <p className="text-[10px] leading-tight">Aviso: Quantidades acima de 50 envios sem proxy podem sofrer shadowban do Google (parece enviado, mas não é computado).</p>
+                  <div className="flex items-start gap-1 lg:gap-2 mt-2 lg:mt-3 p-1.5 lg:p-2 bg-yellow-500/10 border border-yellow-500/20 rounded-md text-yellow-500/80">
+                    <TriangleAlert className="w-3 h-3 lg:w-4 lg:h-4 shrink-0 mt-0.5" />
+                    <p className="text-[8px] lg:text-[10px] leading-tight">Aviso: Acima de 50 envios sem proxy podem sofrer shadowban do Google.</p>
                   </div>
                 )}
               </div>
@@ -145,28 +146,28 @@ export default function FormWeaver() {
 
           {/* Ações Globais */}
           {formTitle && !isFinished && (
-            <div className="flex items-center gap-3 shrink-0 animate-in fade-in duration-300">
+            <div className="flex items-center gap-2 lg:gap-3 shrink-0 animate-in fade-in duration-300">
                <button 
                   onClick={randomizeAll}
                   disabled={isInjecting}
-                  className="flex-1 flex items-center justify-center gap-2 py-2 bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 rounded-lg text-xs font-medium text-neutral-300 transition-all duration-300 ease-in-out disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-1 lg:gap-2 py-1.5 lg:py-2 bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 rounded-lg text-[10px] lg:text-xs font-medium text-neutral-300 transition-all duration-300 ease-in-out disabled:opacity-50"
                >
-                  <Dices className="w-4 h-4" />
+                  <Dices className="w-3 h-3 lg:w-4 lg:h-4" />
                   Aleatório Global
                </button>
                <button 
                   onClick={resetAllWeights}
                   disabled={isInjecting}
-                  className="flex-1 flex items-center justify-center gap-2 py-2 bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 rounded-lg text-xs font-medium text-neutral-300 transition-all duration-300 ease-in-out disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-1 lg:gap-2 py-1.5 lg:py-2 bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 rounded-lg text-[10px] lg:text-xs font-medium text-neutral-300 transition-all duration-300 ease-in-out disabled:opacity-50"
                >
-                  <RefreshCcw className="w-4 h-4" />
+                  <RefreshCcw className="w-3 h-3 lg:w-4 lg:h-4" />
                   Redefinir Global
                </button>
             </div>
           )}
 
           {/* Console de Injeção */}
-          <section className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-5 shadow-2xl flex flex-col flex-1 min-h-0 relative transition-all duration-300">
+          <section className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-3 lg:p-5 shadow-2xl flex flex-col flex-1 min-h-0 relative transition-all duration-300">
             {/* Overlay de Sucesso */}
             {isFinished && (
               <div className="absolute inset-0 z-10 bg-[#0a0a0ae6] backdrop-blur-sm flex flex-col items-center justify-center rounded-xl p-6 text-center animate-in fade-in zoom-in-95 duration-500">
@@ -185,16 +186,16 @@ export default function FormWeaver() {
               </div>
             )}
 
-            <div className="flex items-center justify-between mb-4 shrink-0">
-              <h2 className="text-sm font-medium text-white">Console de Injeção</h2>
-              <div className="text-xs text-neutral-500">
+            <div className="flex items-center justify-between mb-2 lg:mb-4 shrink-0">
+              <h2 className="text-xs lg:text-sm font-medium text-white">Console de Injeção</h2>
+              <div className="text-[10px] lg:text-xs text-neutral-500">
                 Status: {isInjecting ? <span className="text-emerald-400 animate-pulse">Ativo</span> : 'Ocioso'}
               </div>
             </div>
 
             {/* Progresso */}
-            <div className="mb-4 shrink-0">
-              <div className="flex justify-between text-xs mb-2">
+            <div className="mb-3 lg:mb-4 shrink-0">
+              <div className="flex justify-between text-[10px] lg:text-xs mb-1 lg:mb-2">
                 <span className="text-neutral-400">Progresso</span>
                 <span className="text-neutral-300">{currentCount} / {targetCount}</span>
               </div>
@@ -207,27 +208,27 @@ export default function FormWeaver() {
             </div>
 
             {/* Botões de Ação */}
-            <div className="grid grid-cols-2 gap-3 mb-4 shrink-0">
+            <div className="grid grid-cols-2 gap-2 lg:gap-3 mb-2 lg:mb-4 shrink-0">
               <button
                 onClick={startInjection}
                 disabled={isInjecting || questions.length === 0 || currentCount >= targetCount}
-                className="bg-neutral-100 hover:bg-white text-neutral-900 rounded-lg py-2 text-sm font-medium transition-all duration-300 ease-in-out disabled:opacity-50 flex items-center justify-center gap-2"
+                className="bg-neutral-100 hover:bg-white text-neutral-900 rounded-lg py-1.5 lg:py-2 text-[10px] lg:text-sm font-medium transition-all duration-300 ease-in-out disabled:opacity-50 flex items-center justify-center gap-1.5 lg:gap-2"
               >
-                <Play className="w-4 h-4" />
+                <Play className="w-3 h-3 lg:w-4 lg:h-4" />
                 Iniciar
               </button>
               <button
                 onClick={stopInjection}
                 disabled={!isInjecting}
-                className="bg-black/40 hover:bg-black/60 border border-white/10 text-neutral-300 rounded-lg py-2 text-sm font-medium transition-all duration-300 ease-in-out disabled:opacity-50 flex items-center justify-center gap-2"
+                className="bg-black/40 hover:bg-black/60 border border-white/10 text-neutral-300 rounded-lg py-1.5 lg:py-2 text-[10px] lg:text-sm font-medium transition-all duration-300 ease-in-out disabled:opacity-50 flex items-center justify-center gap-1.5 lg:gap-2"
               >
-                <Square className="w-4 h-4" />
+                <Square className="w-3 h-3 lg:w-4 lg:h-4" />
                 Parar
               </button>
             </div>
 
             {/* Terminal Log */}
-            <div className="flex-1 bg-black/60 border border-white/10 rounded-lg p-3 font-mono text-[10px] leading-relaxed overflow-y-auto custom-scrollbar flex flex-col scroll-smooth">
+            <div className="flex-1 bg-black/60 border border-white/10 rounded-lg p-2 lg:p-3 font-mono text-[8px] lg:text-[10px] leading-relaxed overflow-y-auto custom-scrollbar flex flex-col scroll-smooth">
               {logs.length === 0 ? (
                 <div className="text-neutral-600">Aguardando comandos...</div>
               ) : (
@@ -250,25 +251,25 @@ export default function FormWeaver() {
         </div>
 
         {/* Coluna Direita: Visualização de Perguntas */}
-        <section className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl flex flex-col overflow-hidden h-full transition-all duration-300">
+        <section className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl flex flex-col overflow-hidden h-1/2 lg:h-full flex-1 transition-all duration-300">
           {questions.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center text-neutral-500 p-6 text-center">
-              <Search className="w-8 h-8 mb-4 opacity-20 animate-pulse" />
-              <p className="text-sm">Aguardando carregamento do formulário...</p>
+              <Search className="w-6 h-6 lg:w-8 lg:h-8 mb-4 opacity-20 animate-pulse" />
+              <p className="text-xs lg:text-sm">Aguardando carregamento do formulário...</p>
             </div>
           ) : currentQuestion && (
             <div className="flex flex-col h-full animate-in fade-in duration-500">
               {/* Header da Pergunta */}
-              <div className="flex items-center justify-between p-5 border-b border-white/10 bg-black/20 shrink-0">
-                <div className="flex items-center gap-3">
+              <div className="flex flex-col md:flex-row gap-2 items-center justify-between p-3 lg:p-5 border-b border-white/10 bg-black/20 shrink-0">
+                <div className="flex items-center gap-2 lg:gap-3">
                   <button 
                     onClick={prevQuestion}
                     disabled={currentQuestionIndex === 0}
                     className="p-1 text-neutral-400 hover:text-white disabled:opacity-30 transition-all duration-300"
                   >
-                    <ChevronLeft className="w-5 h-5" />
+                    <ChevronLeft className="w-4 h-4 lg:w-5 lg:h-5" />
                   </button>
-                  <span className="text-sm font-medium text-neutral-300 w-32 text-center">
+                  <span className="text-[10px] lg:text-sm font-medium text-neutral-300 w-24 lg:w-32 text-center">
                     Pergunta {currentQuestionIndex + 1} de {questions.length}
                   </span>
                   <button 
@@ -276,43 +277,43 @@ export default function FormWeaver() {
                     disabled={currentQuestionIndex === questions.length - 1}
                     className="p-1 text-neutral-400 hover:text-white disabled:opacity-30 transition-all duration-300"
                   >
-                    <ChevronRight className="w-5 h-5" />
+                    <ChevronRight className="w-4 h-4 lg:w-5 lg:h-5" />
                   </button>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-1.5 lg:gap-2">
                   <button 
                     onClick={() => randomizeWeights(currentQuestion.id)}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 rounded-md text-xs font-medium text-neutral-300 transition-all duration-300 ease-in-out disabled:opacity-50"
+                    className="flex items-center gap-1 lg:gap-2 px-2 lg:px-3 py-1 lg:py-1.5 bg-neutral-800 hover:bg-neutral-700 rounded-md text-[10px] lg:text-xs font-medium text-neutral-300 transition-all duration-300 ease-in-out disabled:opacity-50"
                     disabled={isInjecting || isFinished}
                   >
-                    <Dices className="w-4 h-4" />
+                    <Dices className="w-3 h-3 lg:w-4 lg:h-4" />
                     Aleatório
                   </button>
                   <button 
                     onClick={() => resetQuestionWeights(currentQuestion.id)}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 rounded-md text-xs font-medium text-neutral-300 transition-all duration-300 ease-in-out disabled:opacity-50"
+                    className="flex items-center gap-1 lg:gap-2 px-2 lg:px-3 py-1 lg:py-1.5 bg-neutral-800 hover:bg-neutral-700 rounded-md text-[10px] lg:text-xs font-medium text-neutral-300 transition-all duration-300 ease-in-out disabled:opacity-50"
                     disabled={isInjecting || isFinished}
                   >
-                    <RefreshCcw className="w-4 h-4" />
+                    <RefreshCcw className="w-3 h-3 lg:w-4 lg:h-4" />
                     Redefinir
                   </button>
                 </div>
               </div>
 
               {/* Corpo da Pergunta */}
-              <div className="p-8 flex-1 overflow-y-auto custom-scrollbar flex flex-col relative">
-                <h2 className="text-2xl font-bold text-white mb-8 leading-tight">
+              <div className="p-4 lg:p-8 flex-1 overflow-y-auto custom-scrollbar flex flex-col relative">
+                <h2 className="text-lg lg:text-2xl font-bold text-white mb-4 lg:mb-8 leading-tight">
                   {currentQuestion.title}
                 </h2>
                 
-                <div className="space-y-6 flex-1">
+                <div className="space-y-3 lg:space-y-6 flex-1">
                   {currentQuestion.options.map((opt) => (
-                    <div key={opt.value} className="bg-black/40 p-4 rounded-xl border border-white/10 transition-all duration-300 hover:border-emerald-500/30 hover:shadow-[0_0_15px_rgba(16,185,129,0.15)] group">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm font-medium text-neutral-300 truncate w-[80%] transition-all duration-300" title={opt.value}>
+                    <div key={opt.value} className="bg-black/40 p-3 lg:p-4 rounded-xl border border-white/10 transition-all duration-300 hover:border-emerald-500/30 hover:shadow-[0_0_15px_rgba(16,185,129,0.15)] group">
+                      <div className="flex items-center justify-between mb-2 lg:mb-3">
+                        <span className="text-[10px] lg:text-sm font-medium text-neutral-300 truncate w-[70%] lg:w-[80%] transition-all duration-300" title={opt.value}>
                           {opt.value}
                         </span>
-                        <span className="text-sm font-bold text-neutral-100 bg-white/5 border border-white/10 px-2 py-1 rounded-md transition-all duration-300 w-12 text-center group-hover:text-emerald-400 group-hover:border-emerald-500/30">
+                        <span className="text-[10px] lg:text-sm font-bold text-neutral-100 bg-white/5 border border-white/10 px-1.5 lg:px-2 py-0.5 lg:py-1 rounded-md transition-all duration-300 w-10 lg:w-12 text-center group-hover:text-emerald-400 group-hover:border-emerald-500/30">
                           {opt.weight}%
                         </span>
                       </div>
