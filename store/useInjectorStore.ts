@@ -76,7 +76,6 @@ export const useInjectorStore = create<InjectorState>((set, get) => ({
     currentCount: 0,
     isInjecting: false,
     isScraping: false,
-    isScraping: false,
     logs: [],
     abortController: null,
     isStealthMode: false,
