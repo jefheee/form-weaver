@@ -23,6 +23,7 @@ interface InjectorState {
   isScraping: boolean;
   logs: string[];
   abortController: AbortController | null;
+  authError: string | null;
   
   setFormUrl: (url: string) => void;
   setTargetCount: (count: number) => void;
@@ -41,6 +42,7 @@ interface InjectorState {
   isStealthMode: boolean;
   setStealthMode: (stealth: boolean) => void;
   exportLogs: () => void;
+  setAuthError: (error: string | null) => void;
 }
 
 const getWeightedRandom = (options: Option[]) => {
@@ -77,8 +79,12 @@ export const useInjectorStore = create<InjectorState>((set, get) => ({
     isScraping: false,
     logs: [],
     abortController: null,
-    isStealthMode: false
+    isStealthMode: false,
+    authError: null
   }),
+
+  authError: null,
+  setAuthError: (error) => set({ authError: error }),
 
   isStealthMode: false,
   setStealthMode: (stealth) => set({ isStealthMode: stealth }),
@@ -264,7 +270,7 @@ export const useInjectorStore = create<InjectorState>((set, get) => ({
       return;
     }
     
-    set({ isScraping: true, formTitle: null, questions: [], logs: [], currentQuestionIndex: 0 });
+    set({ isScraping: true, formTitle: null, questions: [], logs: [], currentQuestionIndex: 0, authError: null });
     addLog(`Iniciando scrape: ${formUrl}`);
     
     try {
@@ -277,8 +283,9 @@ export const useInjectorStore = create<InjectorState>((set, get) => ({
       const data = await res.json();
       
       if (!res.ok) {
-        if (res.status === 403 && data.error === 'Login Required') {
-          addLog(`[BARREIRA] ${data.details}`);
+        if (res.status === 403) {
+          addLog(`[BARREIRA] ${data.details || data.error}`);
+          set({ authError: "Este formulário exige autenticação (Login) e não pode ser injetado anonimamente." });
           throw new Error('Barreira de Autenticação Detectada (403). Form protegido.');
         }
         throw new Error(data.error || 'Erro no scrape');
