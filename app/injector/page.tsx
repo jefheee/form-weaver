@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import confetti from "canvas-confetti";
 import Link from "next/link";
 import { useInjectorStore } from "@/store/useInjectorStore";
-import { Play, Square, Settings, RefreshCcw, Activity, Search, ChevronLeft, ChevronRight, Dices, TriangleAlert } from "lucide-react";
+import { Play, Square, Settings, RefreshCcw, Activity, Search, ChevronLeft, ChevronRight, Dices, TriangleAlert, Clock, Download, EyeOff, Eye, Keyboard, MoreVertical } from "lucide-react";
 
 export default function FormWeaver() {
   const {
@@ -12,7 +12,8 @@ export default function FormWeaver() {
     questions, currentQuestionIndex, updateOptionWeight, randomizeWeights, resetQuestionWeights,
     randomizeAll, resetAllWeights, resetApp,
     nextQuestion, prevQuestion, scrapeForm, startInjection, stopInjection, 
-    isInjecting, isScraping, currentCount, logs
+    isInjecting, isScraping, currentCount, logs,
+    isStealthMode, setStealthMode, exportLogs
   } = useInjectorStore();
 
   const progress = targetCount > 0 ? Math.min(100, (currentCount / targetCount) * 100) : 0;
@@ -61,23 +62,51 @@ export default function FormWeaver() {
   return (
     <main className="h-screen w-screen overflow-hidden bg-[#0a0a0a] bg-gradient-to-br from-emerald-900/10 to-black text-neutral-200 p-2 md:p-4 lg:p-6 flex flex-col gap-3 md:gap-4 lg:gap-6 font-sans selection:bg-neutral-800">
       
-      {/* Header */}
+      {/* Header Utilities */}
       <header className="flex items-center justify-between border-b border-white/10 pb-2 lg:pb-4 shrink-0 transition-all duration-300">
         <Link href="/" className="flex items-center gap-2 lg:gap-3 hover:text-emerald-400 transition-colors cursor-pointer group">
           <Activity className="text-neutral-400 group-hover:text-emerald-400 transition-colors w-5 h-5 lg:w-6 lg:h-6" />
           <h1 className="text-lg lg:text-xl font-medium tracking-tight text-white group-hover:text-emerald-400 transition-colors">Form Weaver</h1>
         </Link>
-        <div className="text-[10px] lg:text-xs text-neutral-500 flex items-center gap-1 lg:gap-2">
-          <span className="w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full bg-emerald-500/50 animate-pulse"></span>
-          System Online
+        
+        <div className="flex items-center gap-2 lg:gap-4">
+          <div className="hidden md:flex items-center gap-4 text-neutral-400">
+            <div className="flex items-center gap-1.5 text-xs group cursor-help" title="Estimativa (Avg 4.25s / req)">
+              <Clock className="w-4 h-4 group-hover:text-emerald-400 transition-colors" />
+              <span>{((targetCount - currentCount) * 4.25).toFixed(0)}s</span>
+            </div>
+            
+            <button onClick={exportLogs} className="flex items-center gap-1.5 text-xs hover:text-emerald-400 transition-colors" title="Exportar Logs">
+              <Download className="w-4 h-4" />
+              <span>Logs</span>
+            </button>
+
+            <button onClick={() => setStealthMode(!isStealthMode)} className="flex items-center gap-1.5 text-xs hover:text-emerald-400 transition-colors" title="Modo Stealth">
+              {isStealthMode ? <EyeOff className="w-4 h-4 text-emerald-400" /> : <Eye className="w-4 h-4" />}
+              <span className={isStealthMode ? "text-emerald-400" : ""}>Stealth</span>
+            </button>
+
+            <div className="flex items-center gap-1.5 text-xs group cursor-help" title="ArrowKeys para Navegar">
+              <Keyboard className="w-4 h-4 group-hover:text-emerald-400 transition-colors" />
+            </div>
+          </div>
+          
+          <div className="md:hidden flex items-center group cursor-pointer" title="Configurações Ocultas">
+            <MoreVertical className="w-5 h-5 text-neutral-400 group-hover:text-white" />
+          </div>
+
+          <div className="text-[10px] lg:text-xs text-neutral-500 flex items-center gap-1 lg:gap-2 ml-2 pl-2 lg:pl-4 border-l border-white/10">
+            <span className="w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full bg-emerald-500/50 animate-pulse"></span>
+            Online
+          </div>
         </div>
       </header>
 
-      {/* Grid Principal */}
-      <div className="flex-1 overflow-hidden flex flex-col lg:grid lg:grid-cols-2 gap-4 lg:gap-6 min-h-0">
+      {/* Grid Principal - Responsive adjustments */}
+      <div className="flex-1 overflow-y-auto lg:overflow-hidden flex flex-col lg:grid lg:grid-cols-2 gap-4 lg:gap-6 min-h-0 custom-scrollbar">
         
         {/* Coluna Esquerda: Config & Execução */}
-        <div className="flex flex-col gap-3 lg:gap-6 min-h-0 h-[45%] lg:h-full shrink-0 lg:shrink">
+        <div className="flex flex-col gap-3 lg:gap-6 min-h-0 lg:h-full shrink-0">
           
           {/* Configuração */}
           <section className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-3 lg:p-5 shadow-2xl shrink-0 transition-all duration-300">
@@ -166,8 +195,8 @@ export default function FormWeaver() {
             </div>
           )}
 
-          {/* Console de Injeção */}
-          <section className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-3 lg:p-5 shadow-2xl flex flex-col flex-1 min-h-0 relative transition-all duration-300">
+          {/* Console de Injeção - Ajuste para Mobile */}
+          <section className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-3 lg:p-5 shadow-2xl flex flex-col lg:flex-1 h-64 lg:h-auto min-h-0 relative transition-all duration-300">
             {/* Overlay de Sucesso */}
             {isFinished && (
               <div className="absolute inset-0 z-10 bg-[#0a0a0ae6] backdrop-blur-sm flex flex-col items-center justify-center rounded-xl p-6 text-center animate-in fade-in zoom-in-95 duration-500">
@@ -250,8 +279,8 @@ export default function FormWeaver() {
 
         </div>
 
-        {/* Coluna Direita: Visualização de Perguntas */}
-        <section className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl flex flex-col overflow-hidden h-1/2 lg:h-full flex-1 transition-all duration-300">
+        {/* Coluna Direita: Visualização de Perguntas - Altura fluida no mobile */}
+        <section className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl flex flex-col overflow-hidden h-[50vh] lg:h-full transition-all duration-300">
           {questions.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center text-neutral-500 p-6 text-center">
               <Search className="w-6 h-6 lg:w-8 lg:h-8 mb-4 opacity-20 animate-pulse" />

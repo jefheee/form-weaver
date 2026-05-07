@@ -38,6 +38,9 @@ interface InjectorState {
   stopInjection: () => void;
   addLog: (msg: string) => void;
   resetApp: () => void;
+  isStealthMode: boolean;
+  setStealthMode: (stealth: boolean) => void;
+  exportLogs: () => void;
 }
 
 const getWeightedRandom = (options: Option[]) => {
@@ -71,9 +74,28 @@ export const useInjectorStore = create<InjectorState>((set, get) => ({
     currentCount: 0,
     isInjecting: false,
     isScraping: false,
+    isScraping: false,
     logs: [],
-    abortController: null
+    abortController: null,
+    isStealthMode: false
   }),
+
+  isStealthMode: false,
+  setStealthMode: (stealth) => set({ isStealthMode: stealth }),
+  
+  exportLogs: () => {
+    const { logs } = get();
+    if (logs.length === 0) return;
+    const blob = new Blob([logs.join('\n')], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `form-weaver-logs-${new Date().getTime()}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  },
 
   setFormUrl: (url) => set({ formUrl: url }),
   setTargetCount: (count) => set({ targetCount: count }),
@@ -254,7 +276,13 @@ export const useInjectorStore = create<InjectorState>((set, get) => ({
       
       const data = await res.json();
       
-      if (!res.ok) throw new Error(data.error || 'Erro no scrape');
+      if (!res.ok) {
+        if (res.status === 403 && data.error === 'Login Required') {
+          addLog(`[BARREIRA] ${data.details}`);
+          throw new Error('Barreira de Autenticação Detectada (403). Form protegido.');
+        }
+        throw new Error(data.error || 'Erro no scrape');
+      }
       
       set({ formTitle: data.title, questions: data.questions, isScraping: false });
       addLog(`Formulário carregado: ${data.title} (${data.questions.length} perguntas suportadas)`);
@@ -290,7 +318,9 @@ export const useInjectorStore = create<InjectorState>((set, get) => ({
 
         if (res.ok) {
           set((s) => ({ currentCount: s.currentCount + 1 }));
-          get().addLog(`[200 OK] Submissão ${get().currentCount}/${current.targetCount} enviada.`);
+          if (!get().isStealthMode) {
+             get().addLog(`[200 OK] Submissão ${get().currentCount}/${current.targetCount} enviada.`);
+          }
         } else {
           get().addLog(`[ERRO] Falha ao enviar submissão (Status não OK).`);
         }
@@ -305,7 +335,9 @@ export const useInjectorStore = create<InjectorState>((set, get) => ({
 
       if (get().currentCount < get().targetCount && get().isInjecting) {
         const delay = Math.floor(Math.random() * (6000 - 2500 + 1) + 2500);
-        get().addLog(`Aguardando ${(delay / 1000).toFixed(1)}s para evasão de rate limit...`);
+        if (!get().isStealthMode) {
+           get().addLog(`Aguardando ${(delay / 1000).toFixed(1)}s para evasão de rate limit...`);
+        }
         
         try {
           await new Promise((resolve, reject) => {
