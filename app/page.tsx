@@ -25,26 +25,26 @@ export default function LandingPage() {
         
         {/* Main Hero Card */}
         <div className="md:col-span-8 bg-[#0f172a]/50 backdrop-blur-xl border border-[#1e293b] rounded-3xl p-8 lg:p-12 flex flex-col justify-center relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+          <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
           
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-cyan-500/20 bg-cyan-500/10 text-cyan-400 text-xs font-medium tracking-wide w-fit mb-6 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
+          <div className="relative z-10 inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-cyan-500/20 bg-cyan-500/10 text-cyan-400 text-xs font-medium tracking-wide w-fit mb-6 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
             <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.8)]"></span>
             v2.0 Beta - Enterprise Build
           </div>
 
-          <h1 className="text-4xl lg:text-7xl font-bold tracking-tighter mb-4 lg:mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-slate-500">
+          <h1 className="relative z-10 text-4xl lg:text-7xl font-bold tracking-tighter mb-4 lg:mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-slate-500">
             Orquestração de Dados para Google Forms.
           </h1>
           
-          <p className="text-base lg:text-lg text-slate-400 max-w-2xl font-light leading-relaxed mb-10">
+          <p className="relative z-10 text-base lg:text-lg text-slate-400 max-w-2xl font-light leading-relaxed mb-10">
             A primeira ferramenta de stress-test e injeção probabilística de respostas em massa. Valide a resiliência dos seus formulários com simulação orgânica absoluta.
           </p>
 
           <Link 
             href="/injector" 
-            className="group/btn flex items-center justify-center gap-3 px-8 py-4 font-semibold text-white bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-xl transition-all duration-300 shadow-[0_0_30px_rgba(6,182,212,0.3)] hover:shadow-[0_0_40px_rgba(6,182,212,0.5)] hover:-translate-y-0.5 w-fit"
+            className="relative z-10 group/btn flex items-center justify-center gap-3 px-8 py-4 font-semibold text-white bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 rounded-xl transition-all duration-300 shadow-[0_0_30px_rgba(6,182,212,0.3)] hover:shadow-[0_0_40px_rgba(6,182,212,0.5)] hover:-translate-y-0.5 w-fit"
           >
-            Inicie o Teste de Estresse Estrutural
+            Acessar Console de Injeção
             <ChevronRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
           </Link>
         </div>
